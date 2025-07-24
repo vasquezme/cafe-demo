@@ -1,0 +1,6 @@
+dash
+pandas
+matplotlib
+plotly
+geopandas
+gunicorn
