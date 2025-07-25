@@ -1,0 +1,27 @@
+{
+"type": "FeatureCollection",
+"name": "shops-5min",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "name": "Mos Mos", "longitude": -79, "latitude": 44, "HubDist": 281.90735587011045, "id": 19 }, "geometry": { "type": "Point", "coordinates": [ -79.3843196, 43.6576683 ] } },
+{ "type": "Feature", "properties": { "name": "Jimmy's Coffee", "longitude": -79, "latitude": 44, "HubDist": 314.69482844450113, "id": 31 }, "geometry": { "type": "Point", "coordinates": [ -79.3855605, 43.6584773 ] } },
+{ "type": "Feature", "properties": { "name": "Aroma Espresso Bar", "longitude": -79, "latitude": 44, "HubDist": 239.39473330650645, "id": 48 }, "geometry": { "type": "Point", "coordinates": [ -79.383744, 43.6551728 ] } },
+{ "type": "Feature", "properties": { "name": "Tim Hortons", "longitude": -79, "latitude": 44, "HubDist": 274.64381393490726, "id": 49 }, "geometry": { "type": "Point", "coordinates": [ -79.3832356, 43.6553882 ] } },
+{ "type": "Feature", "properties": { "name": "Tim Hortons", "longitude": -79, "latitude": 44, "HubDist": 229.85109744068654, "id": 55 }, "geometry": { "type": "Point", "coordinates": [ -79.3880353, 43.6575368 ] } },
+{ "type": "Feature", "properties": { "name": "Starbucks", "longitude": -79, "latitude": 44, "HubDist": 321.712008805979, "id": 56 }, "geometry": { "type": "Point", "coordinates": [ -79.3826159, 43.6557356 ] } },
+{ "type": "Feature", "properties": { "name": "Timothy's", "longitude": -79, "latitude": 44, "HubDist": 293.4310470965878, "id": 57 }, "geometry": { "type": "Point", "coordinates": [ -79.389881, 43.656894 ] } },
+{ "type": "Feature", "properties": { "name": "Java Joe's", "longitude": -79, "latitude": 44, "HubDist": 51.570850525652595, "id": 58 }, "geometry": { "type": "Point", "coordinates": [ -79.386618, 43.655284 ] } },
+{ "type": "Feature", "properties": { "name": "Uncle Tetsu's Japanese Angel Cafe", "longitude": -79, "latitude": 44, "HubDist": 91.465278920949089, "id": 68 }, "geometry": { "type": "Point", "coordinates": [ -79.3868744, 43.6549486 ] } },
+{ "type": "Feature", "properties": { "name": "Cafe de Paris", "longitude": -79, "latitude": 44, "HubDist": 113.05143374472196, "id": 69 }, "geometry": { "type": "Point", "coordinates": [ -79.3872889, 43.6548604 ] } },
+{ "type": "Feature", "properties": { "name": "Presotea", "longitude": -79, "latitude": 44, "HubDist": 89.519192765232233, "id": 71 }, "geometry": { "type": "Point", "coordinates": [ -79.3868257, 43.6549586 ] } },
+{ "type": "Feature", "properties": { "name": "Timothy's", "longitude": -79, "latitude": 44, "HubDist": 286.62652021851761, "id": 80 }, "geometry": { "type": "Point", "coordinates": [ -79.383069, 43.656009 ] } },
+{ "type": "Feature", "properties": { "name": "Starbucks", "longitude": -79, "latitude": 44, "HubDist": 155.95697843705506, "id": 85 }, "geometry": { "type": "Point", "coordinates": [ -79.3847765, 43.6552898 ] } },
+{ "type": "Feature", "properties": { "name": "Café Plenty", "longitude": -79, "latitude": 44, "HubDist": 260.21371183233947, "id": 96 }, "geometry": { "type": "Point", "coordinates": [ -79.389503, 43.6547214 ] } },
+{ "type": "Feature", "properties": { "name": "Tim Hortons", "longitude": -79, "latitude": 44, "HubDist": 234.86009430402498, "id": 97 }, "geometry": { "type": "Point", "coordinates": [ -79.3889763, 43.6545229 ] } },
+{ "type": "Feature", "properties": { "name": "Starbucks", "longitude": -79, "latitude": 44, "HubDist": 200.60111419111374, "id": 120 }, "geometry": { "type": "Point", "coordinates": [ -79.3869932, 43.6575313 ] } },
+{ "type": "Feature", "properties": { "name": "Avenue Cafe & Bistro", "longitude": -79, "latitude": 44, "HubDist": 194.8630358243432, "id": 122 }, "geometry": { "type": "Point", "coordinates": [ -79.3889093, 43.6552247 ] } },
+{ "type": "Feature", "properties": { "name": "Cotti Coffee", "longitude": -79, "latitude": 44, "HubDist": 281.62125489652635, "id": 142 }, "geometry": { "type": "Point", "coordinates": [ -79.3855629, 43.6581675 ] } },
+{ "type": "Feature", "properties": { "name": "Starbucks", "longitude": -79, "latitude": 44, "HubDist": 169.93985593266831, "id": 159 }, "geometry": { "type": "Point", "coordinates": [ -79.387717, 43.6544495 ] } },
+{ "type": "Feature", "properties": { "name": "Chatime", "longitude": -79, "latitude": 44, "HubDist": 153.12719117008194, "id": 169 }, "geometry": { "type": "Point", "coordinates": [ -79.3847106, 43.6556486 ] } }
+]
+}

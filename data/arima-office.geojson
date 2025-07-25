@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "Arima Office",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::4267" } },
+"features": [
+{ "type": "Feature", "properties": { "NAME": "Arima Office", "LATITUDE": 43.65569059735889, "LONGITUDE": -79.38680359237523, "ID": 1 }, "geometry": { "type": "Point", "coordinates": [ -79.38680359237523, 43.65569059735889 ] } }
+]
+}
