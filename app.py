@@ -51,9 +51,9 @@ def create_map(selected_walk_time):
         fig.add_trace(go.Scattermap(lon=lons, lat=lats, mode='lines', fill='toself', fillcolor='rgba(255, 165, 0, 0.3)', line=dict(width=2, color='orange'), name='15min-walk Polygon'))
     elif selected_walk_time == 'all':
         for mins, poly, fillcolor, linecolor, legend in [
-            ('5', min5polygon, 'rgba(173, 216, 230, 0.3)', 'blue', '5 min Walk Time'), 
-            ('10', min10polygon, 'rgba(255, 204, 203, 0.3)', 'red', '10 min Walk Time'),
-            ('15', min15polygon, 'rgba(255, 165, 0, 0.3)', 'orange', '15 min Walk Time') 
+            ('5', min5polygon, 'rgba(173, 216, 230, 0.3)', 'blue', '5 min. Walk Time'), 
+            ('10', min10polygon, 'rgba(255, 204, 203, 0.3)', 'red', '10 min. Walk Time'),
+            ('15', min15polygon, 'rgba(255, 165, 0, 0.3)', 'orange', '15 min. Walk Time') 
         ]:
             polygon_coords = poly["features"][0]["geometry"]["coordinates"][0]
             lons, lats = zip(*polygon_coords)
