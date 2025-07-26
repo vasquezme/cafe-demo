@@ -245,8 +245,10 @@ app.layout = html.Div([
 def update_dashboard(selected_walk_time):
     if selected_walk_time == 'all':
         filtered_df = locations_df
+    elif selected_walk_time == '15':
+        filtered_df = locations_df[locations_df['properties.WALKTIME'].astype(str).isin(['5', '10', '15'])]
     else:
-        filtered_df = locations_df[locations_df['properties.WALKTIME'].astype(str) == selected_walk_time] 
+        filtered_df = locations_df[locations_df['properties.WALKTIME'].astype(str) == selected_walk_time]
                                                                                       
     # Scorecard calculations
     total_locations = filtered_df.shape[0]
