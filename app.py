@@ -4,6 +4,13 @@ from dash import dcc, html, Input, Output
 import plotly.express as px
 import json
 import plotly.graph_objects as go
+import posthog
+
+
+posthog.project_api_key = 'phc_RLhhUoMn6wYHZYUizZRKGW8wf2N64mlvdkKzK0lyF95'
+posthog.host = 'https://us.i.posthog.com'
+
+posthog.capture('user-id', 'event-name', properties={'key': 'value'})
 
 
 # Load GeoJSON files
