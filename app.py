@@ -10,8 +10,6 @@ import posthog
 posthog.project_api_key = 'phc_RLhhUoMn6wYHZYUizZRKGW8wf2N64mlvdkKzK0lyF95'
 posthog.host = 'https://us.i.posthog.com'
 
-posthog.capture('user-id', 'event-name', properties={'key': 'value'})
-
 
 # Load GeoJSON files
 with open("data/5min-walk.geojson") as f:
@@ -133,7 +131,7 @@ def create_map(selected_walk_time):
         legend=dict(
             font=dict(size=18)
         ),
-)
+    )
     return fig
 
 
@@ -189,34 +187,34 @@ app.layout = html.Div([
     value='all',  # default value
     clearable=False,
     style={'width': '200px', 'margin': '0 auto 20px auto', 'fontSize': '18px','fontWeight' : 'bold'}
-),
+    ),
 
         # --- SCORECARD SECTION ---
     html.Div([
         html.Div([
             html.H3("Coffee Shops", style={"fontsize": "24px", "fontWeight": "bold"}),
             html.P(id="scorecard-shops", style={"fontSize": "42px", "fontWeight": "bold"})
-    ], style={"padding": "10px", "margin": "5px", "background": "#f9f9f9", "border": "2px solid #333", "borderRadius": "5px", "textAlign": "center", "width": "200px"}),
-    html.Div([
-        html.H3("Total Revenue", style={"fontsize": "24px", "fontWeight": "bold"}),
-        html.P(id="scorecard-revenue", style={"fontSize": "42px", "fontWeight": "bold"})
-    ], style={"padding": "10px", "margin": "5px", "background": "#f9f9f9", "border": "2px solid #333", "borderRadius": "5px", "textAlign": "center", "width": "200px"}),
-    html.Div([
-        html.H3("Total Customers", style={"fontsize": "24px", "fontWeight": "bold"}),
-        html.P(id="scorecard-customers", style={"fontSize": "42px", "fontWeight": "bold"})
-    ], style={"padding": "10px", "margin": "5px", "background": "#f9f9f9", "border": "2px solid #333", "borderRadius": "5px", "textAlign": "center", "width": "200px"}),
-    html.Div([
-        html.H3("Donuts Sold", style={"fontsize": "24px", "fontWeight": "bold"}),
-        html.P(id="scorecard-donuts", style={"fontSize": "42px", "fontWeight": "bold"})
-    ], style={"padding": "10px", "margin": "5px", "background": "#f9f9f9", "border": "2px solid #333", "borderRadius": "5px", "textAlign": "center", "width": "200px"}),
-    html.Div([
-        html.H3("Average Distance (M)", style={"fontsize": "24px", "fontWeight": "bold"}),
-        html.P(id="scorecard-distance", style={"fontSize": "42px", "fontWeight": "bold"})
-    ], style={"padding": "10px", "margin": "5px", "background": "#f9f9f9", "border": "2px solid #333", "borderRadius": "5px", "textAlign": "center", "width": "200px"}),
-    html.Div([
-        html.H3("Average Rating", style={"fontsize": "24px", "fontWeight": "bold"}),
-        html.P(id="scorecard-rating", style={"fontSize": "42px", "fontWeight": "bold"})
-    ], style={"padding": "10px", "margin": "5px", "background": "#f9f9f9", "border": "2px solid #333", "borderRadius": "5px", "textAlign": "center", "width": "200px"}),    
+        ], style={"padding": "10px", "margin": "5px", "background": "#f9f9f9", "border": "2px solid #333", "borderRadius": "5px", "textAlign": "center", "width": "200px"}),
+        html.Div([
+            html.H3("Total Revenue", style={"fontsize": "24px", "fontWeight": "bold"}),
+            html.P(id="scorecard-revenue", style={"fontSize": "42px", "fontWeight": "bold"})
+        ], style={"padding": "10px", "margin": "5px", "background": "#f9f9f9", "border": "2px solid #333", "borderRadius": "5px", "textAlign": "center", "width": "200px"}),
+        html.Div([
+            html.H3("Total Customers", style={"fontsize": "24px", "fontWeight": "bold"}),
+            html.P(id="scorecard-customers", style={"fontSize": "42px", "fontWeight": "bold"})
+        ], style={"padding": "10px", "margin": "5px", "background": "#f9f9f9", "border": "2px solid #333", "borderRadius": "5px", "textAlign": "center", "width": "200px"}),
+        html.Div([
+            html.H3("Donuts Sold", style={"fontsize": "24px", "fontWeight": "bold"}),
+            html.P(id="scorecard-donuts", style={"fontSize": "42px", "fontWeight": "bold"})
+        ], style={"padding": "10px", "margin": "5px", "background": "#f9f9f9", "border": "2px solid #333", "borderRadius": "5px", "textAlign": "center", "width": "200px"}),
+        html.Div([
+            html.H3("Average Distance (M)", style={"fontsize": "24px", "fontWeight": "bold"}),
+            html.P(id="scorecard-distance", style={"fontSize": "42px", "fontWeight": "bold"})
+        ], style={"padding": "10px", "margin": "5px", "background": "#f9f9f9", "border": "2px solid #333", "borderRadius": "5px", "textAlign": "center", "width": "200px"}),
+        html.Div([
+            html.H3("Average Rating", style={"fontsize": "24px", "fontWeight": "bold"}),
+            html.P(id="scorecard-rating", style={"fontSize": "42px", "fontWeight": "bold"})
+        ], style={"padding": "10px", "margin": "5px", "background": "#f9f9f9", "border": "2px solid #333", "borderRadius": "5px", "textAlign": "center", "width": "200px"}),    
 ], style={"display": "flex", "justifyContent": "center", "marginBottom": "30px"}),   
 
     # Add the graph to the layout
@@ -245,10 +243,20 @@ app.layout = html.Div([
         Output('pie-graph', 'figure'),
         Output('pie-graph-2', 'figure'),
         Output('scatter-graph', 'figure'),
-        Output('scatter-graph-2', 'figure')
+        Output('scatter-graph-2', 'figure'),
     ],
-    Input('walk-time-dropdown', 'value')
+    [
+        Input('walk-time-dropdown', 'value'),
+    ]
 )
+def update_output(selected_walk_time):
+    posthog.capture(
+        distinct_id='user-id',  # Replace with actual user ID
+        event='dropdown-changed',
+        properties={'selected_value': selected_walk_time}
+    )
+    return update_dashboard(selected_walk_time)
+
 def update_dashboard(selected_walk_time):
     if selected_walk_time == 'all':
         filtered_df = locations_df
