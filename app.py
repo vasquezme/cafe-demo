@@ -7,8 +7,13 @@ import plotly.graph_objects as go
 import posthog
 
 
-posthog.project_api_key = 'phc_RLhhUoMn6wYHZYUizZRKGW8wf2N64mlvdkKzK0lyF95'
+posthog.api_key = 'phc_RLhhUoMn6wYHZYUizZRKGW8wf2N64mlvdkKzK0lyF95'
 posthog.host = 'https://us.i.posthog.com'
+
+posthog.capture(
+    distinct_id='test',
+    event='test-event'
+)
 
 
 # Load GeoJSON files
