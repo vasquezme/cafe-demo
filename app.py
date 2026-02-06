@@ -233,6 +233,10 @@ app.layout = html.Div([
     html.Div([
     ], style={"display": "flex", "justifyContent": "center", "alignItems": "stretch", "gap": "20px"}),
     dcc.Graph(id='scatter-graph-2')
+    html.Iframe(
+    src="https://notebooklm.google.com/YOUR_SHARED_CHAT_LINK",
+    height=600, width="100%",
+    style={"border": "none"}
 ])
 
 @app.callback(
@@ -331,3 +335,4 @@ def update_dashboard(selected_walk_time):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
