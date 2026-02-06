@@ -232,7 +232,12 @@ app.layout = html.Div([
     dcc.Graph(id='scatter-graph'),
     html.Div([
     ], style={"display": "flex", "justifyContent": "center", "alignItems": "stretch", "gap": "20px"}),
-    dcc.Graph(id='scatter-graph-2')
+    dcc.Graph(id='scatter-graph-2'),
+    html.Iframe(
+        src="https://notebooklm.google.com/notebook/515420a1-c679-4948-9b5c-a9e729e529e6",
+        height=600, width="100%",
+        style={"border": "none"}
+    ),
 ])
 
 @app.callback(
