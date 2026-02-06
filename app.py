@@ -1,11 +1,15 @@
 import pandas as pd
 import dash
-from dash import dcc, html, Input, Output
+from dash import dcc, html, Input, Output, Dash, callback, State
+import os
+import openai
+from dash_chat import ChatComponent
 import plotly.express as px
 import json
 import plotly.graph_objects as go
 import posthog
-
+import os
+from dash import *
 
 posthog.api_key = 'phc_RLhhUoMn6wYHZYUizZRKGW8wf2N64mlvdkKzK0lyF95'
 posthog.host = 'https://us.i.posthog.com'
@@ -232,12 +236,16 @@ app.layout = html.Div([
     dcc.Graph(id='scatter-graph'),
     html.Div([
     ], style={"display": "flex", "justifyContent": "center", "alignItems": "stretch", "gap": "20px"}),
-    dcc.Graph(id='scatter-graph-2')
+    dcc.Graph(id='scatter-graph-2'),
     html.Iframe(
-    src="https://notebooklm.google.com/YOUR_SHARED_CHAT_LINK",
-    height=600, width="100%",
-    style={"border": "none"}
+        src="https://notebooklm.google.com/YOUR_SHARED_CHAT_LINK",
+        height=600, width="100%",
+        style={"border": "none"}
+    ),
+    ChatComponent(id="chat", messages=[]),
+    dcc.Store(id="chat-history")
 ])
+
 
 @app.callback(
     [
@@ -333,6 +341,20 @@ def update_dashboard(selected_walk_time):
     )
 
 
+@app.callback(
+    Output("chat", "messages"),
+    Input("chat", "user-input"),
+    State("chat-history", "data")
+)
+def send_message(user_input, history):
+    if user_input:
+        response = openai.ChatCompletion.create(
+            model="gpt-4o-mini",  # Cheap/fast
+            messages=[{"role": "user", "content": f"Arimadata help: {user_input}"}]
+        )
+        return history + [{"role": "user", "content": user_input}, {"role": "assistant", "content": response.choices[0].message.content}]
+    return history
+
+
 if __name__ == "__main__":
     app.run(debug=True)
-
