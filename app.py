@@ -5,6 +5,7 @@ import plotly.express as px
 import json
 import plotly.graph_objects as go
 import posthog
+import requests  # Use official/unofficial NotebookLM API
 
 
 posthog.api_key = 'phc_RLhhUoMn6wYHZYUizZRKGW8wf2N64mlvdkKzK0lyF95'
@@ -233,11 +234,10 @@ app.layout = html.Div([
     html.Div([
     ], style={"display": "flex", "justifyContent": "center", "alignItems": "stretch", "gap": "20px"}),
     dcc.Graph(id='scatter-graph-2'),
-    html.Iframe(
-        src="https://notebooklm.google.com/notebook/515420a1-c679-4948-9b5c-a9e729e529e6",
-        height=600, width="100%",
-        style={"border": "none"}
-    ),
+
+    dcc.Input(id='user-input', type='text', placeholder='Ask a question about the data...', style={'width': '80%', 'margin': '20px auto', 'fontSize': '18px'}),
+    html.Button('Submit', id='submit-button', n_clicks=0, style={'display': 'block', 'margin': '0 auto', 'fontSize': '18px', 'fontWeight': 'bold'}),
+    html.Div(id='chat-response', style={'whiteSpace': 'pre-line', 'margin': '20px', 'fontSize': '18px'}),
 ])
 
 @app.callback(
@@ -333,6 +333,12 @@ def update_dashboard(selected_walk_time):
         fig5, #scatter-graph-2 top 5 coffee chains by revenue - donuts sold bubble chart
     )
 
+@app.callback(Output('chat-response', 'children'),
+              Input('user-input', 'value'))
+def handle_chat(user_query):
+    # Call NotebookLM API server-side with your service account
+    response = call_notebooklm_api(notebook_id="515420a1-c679-4948-9b5c-a9e729e529e6", query=user_query)
+    return response['answer']
 
 if __name__ == "__main__":
     app.run(debug=True)
