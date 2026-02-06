@@ -5,3 +5,6 @@ plotly
 geopandas
 posthog
 gunicorn
+dash-openai-chatbot  # or dash dash-chat openai
+openai
+python-dotenv
