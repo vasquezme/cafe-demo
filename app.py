@@ -1,6 +1,6 @@
 import pandas as pd
 import dash
-from dash import dcc, html, Input, Output
+from dash import dcc, html, Input, Output, callback, no_update
 import plotly.express as px
 import json
 import plotly.graph_objects as go
@@ -368,5 +368,31 @@ def handle_chat(user_msg):
 def handle_chat(user_msg):
     return f"Echo: {user_msg} (NotebookLM pending admin approval)"
 
+# New simple Dash app for chat testing
+app2 = Dash(__name__)
+
+app2.layout = html.Div([
+    dcc.Input(id="message", value="", placeholder="Type here...", type="text"),
+    html.Div(id="response", children=""),  # ← Response appears here
+    html.Br()
+])
+
+@callback(
+    Output("response", "children"),  # ← EXACTLY matches id="response" above
+    Input("message", "value")        # ← EXACTLY matches id="message" above
+)
+def handle_chat(msg):
+    print(f"DEBUG: Got '{msg}'")  # Shows in Render logs
+    
+    if not msg:
+        return no_update
+    
+    test_mode = True  # Hard-coded for now - no env var needed!
+    if test_mode:
+        return f"✅ WORKING! You typed: {msg}"
+    
+    return "Test complete"
+
 if __name__ == "__main__":
     app.run(debug=True)
+    app2.run(debug=True, port=8051)  # Run on a different port
