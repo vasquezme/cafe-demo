@@ -8,6 +8,8 @@ import posthog
 import requests  # Use official/unofficial NotebookLM API
 import os  # Import os for environment variable access
 
+# Set the environment variable for test mode
+os.environ['NOTEBOOKLM_TEST_MODE'] = 'true'
 
 posthog.api_key = 'phc_RLhhUoMn6wYHZYUizZRKGW8wf2N64mlvdkKzK0lyF95'
 posthog.host = 'https://us.i.posthog.com'
