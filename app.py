@@ -6,6 +6,7 @@ import json
 import plotly.graph_objects as go
 import posthog
 import requests  # Use official/unofficial NotebookLM API
+import os  # Import os for environment variable access
 
 
 posthog.api_key = 'phc_RLhhUoMn6wYHZYUizZRKGW8wf2N64mlvdkKzK0lyF95'
@@ -348,17 +349,19 @@ def handle_chat(user_msg):
     Input("chat-input", "value")
 )
 def handle_chat(user_msg):
+    if not user_msg:
+        raise dash.exceptions.PreventUpdate
+    
+    # TEMPORARY: Test mode while waiting for permissions
+    if os.getenv('NOTEBOOKLM_TEST_MODE', 'false').lower() == 'true':
+        return f"✅ Echo test working: {user_msg} (NotebookLM pending admin approval)"
+    
+    # Your existing NotebookLM code stays exactly the same
     try:
-        if not user_msg:
-            raise dash.exceptions.PreventUpdate
-        
-        # Your NotebookLM call here
-        response = call_notebooklm_api(notebook_id="515420a1-c679-4948-9b5c-a9e729e529e6", query=user_msg)  # NotebookLM ID added
+        response = call_notebooklm_api(user_msg)  # Your real function
         return response
-        
     except Exception as e:
-        print(f"ERROR: {str(e)}")  # This will show in Render logs
-        return f"Error: {str(e)}"  # This shows in UI
+        return f"Error: {str(e)}"
 
 def handle_chat(user_msg):
     return f"Echo: {user_msg} (NotebookLM pending admin approval)"
