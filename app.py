@@ -343,5 +343,22 @@ def handle_chat(user_msg):
     answer = call_notebooklm(user_msg)  # your function
     return answer or "No answer received."
 
+@app.callback(
+    Output("chat-output", "children"),
+    Input("chat-input", "value")
+)
+def handle_chat(user_msg):
+    try:
+        if not user_msg:
+            raise dash.exceptions.PreventUpdate
+        
+        # Your NotebookLM call here
+        response = call_notebooklm_api(notebook_id="515420a1-c679-4948-9b5c-a9e729e529e6", query=user_msg)  # NotebookLM ID added
+        return response
+        
+    except Exception as e:
+        print(f"ERROR: {str(e)}")  # This will show in Render logs
+        return f"Error: {str(e)}"  # This shows in UI
+
 if __name__ == "__main__":
     app.run(debug=True)
