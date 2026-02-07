@@ -360,5 +360,8 @@ def handle_chat(user_msg):
         print(f"ERROR: {str(e)}")  # This will show in Render logs
         return f"Error: {str(e)}"  # This shows in UI
 
+def handle_chat(user_msg):
+    return f"Echo: {user_msg} (NotebookLM pending admin approval)"
+
 if __name__ == "__main__":
     app.run(debug=True)
