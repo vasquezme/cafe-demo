@@ -50,97 +50,58 @@ server = app.server
 
 def create_map(selected_walk_time):
     fig = go.Figure()
-    # Add polygons based on selected_walk_time
-    if selected_walk_time == '5':
-        polygon_coords = min5polygon["features"][0]["geometry"]["coordinates"][0]
-        lons, lats = zip(*polygon_coords)
-        fig.add_trace(go.Scattermap(lon=lons, lat=lats, mode='lines', fill='toself', fillcolor='rgba(173, 216, 230, 0.7)', line=dict(width=2, color='blue'), name='5min-walk Polygon'))
-    elif selected_walk_time == '10':
-        polygon_coords = min10polygon["features"][0]["geometry"]["coordinates"][0]
-        lons, lats = zip(*polygon_coords)
-        fig.add_trace(go.Scattermap(lon=lons, lat=lats, mode='lines', fill='toself', fillcolor='rgba(255, 204, 203, 0.7)', line=dict(width=2, color='red'), name='10min-walk Polygon'))
-    elif selected_walk_time == '15':
-        polygon_coords = min15polygon["features"][0]["geometry"]["coordinates"][0]
-        lons, lats = zip(*polygon_coords)
-        fig.add_trace(go.Scattermap(lon=lons, lat=lats, mode='lines', fill='toself', fillcolor='rgba(255, 165, 0, 0.3)', line=dict(width=2, color='orange'), name='15min-walk Polygon'))
-    elif selected_walk_time == 'all':
-        for mins, poly, fillcolor, linecolor, legend in [
-            ('5', min5polygon, 'rgba(173, 216, 230, 0.3)', 'blue', '5 min. Walk Time'), 
-            ('10', min10polygon, 'rgba(255, 204, 203, 0.3)', 'red', '10 min. Walk Time'),
-            ('15', min15polygon, 'rgba(255, 165, 0, 0.3)', 'orange', '15 min. Walk Time') 
-        ]:
-            polygon_coords = poly["features"][0]["geometry"]["coordinates"][0]
-            lons, lats = zip(*polygon_coords)
-            fig.add_trace(go.Scattermap(
-                lon=lons,
-                lat=lats,
-                mode='lines',
-                fill='toself',
-                fillcolor=fillcolor,
-                line=dict(width=2, color=linecolor),
-                name=legend
-            ))
-
-    # Add locations
-    # Extract all coffee location points
-    lons_loc = []
-    lats_loc = []
-    hover_texts = []
-    for feature in locations["features"]:
-        coords = feature["geometry"]["coordinates"]
-        lons_loc.append(coords[0])
-        lats_loc.append(coords[1])
-        props = feature["properties"]
-        hover_texts.append(
-            f"Name: {props.get('NAME', 'N/A')}<br>"
-            f"Chain: {props.get('CHAIN_NAME', 'N/A')}<br>"
-            f"Revenue: ${props.get('REVENUE', 'N/A')}<br>"
-            f"Rating: {props.get('RATING', 'N/A')}"
-        )
     
-    fig.add_trace(
-        go.Scattermap(
-            lon=lons_loc,
-            lat=lats_loc,
-            mode='markers',
-            marker=dict(size=10, color='black'),
-            name='Coffee Locations',
-            text=hover_texts,
-            hoverinfo='text'
-        )
-    )
+    # SAFE polygon handling - no more IndexError
+    def safe_add_polygon(poly_data, color, name):
+        try:
+            if poly_data.get('features') and len(poly_data['features']) > 0:
+                coords = poly_data["features"][0]["geometry"]["coordinates"][0]
+                lons, lats = zip(*coords)
+                fig.add_trace(go.Scattermap(lon=lons, lat=lats, mode='lines', fill='toself', 
+                                          fillcolor=color, line=dict(width=2, color=color), name=name))
+        except (IndexError, KeyError, ValueError):
+            pass  # Skip broken polygons silently
+    
+    # Safe polygon loading
+    if selected_walk_time == '5':
+        safe_add_polygon(min5polygon, 'rgba(173, 216, 230, 0.7)', '5min-walk')
+    elif selected_walk_time == '10':
+        safe_add_polygon(min10polygon, 'rgba(255, 204, 203, 0.7)', '10min-walk')
+    elif selected_walk_time == '15':
+        safe_add_polygon(min15polygon, 'rgba(255, 165, 0, 0.3)', '15min-walk')
+    elif selected_walk_time == 'all':
+        safe_add_polygon(min5polygon, 'rgba(173, 216, 230, 0.3)', '5 min')
+        safe_add_polygon(min10polygon, 'rgba(255, 204, 203, 0.3)', '10 min')
+        safe_add_polygon(min15polygon, 'rgba(255, 165, 0, 0.3)', '15 min')
 
-    # Add office location
-    # Extract all coffee location points
-    lons_loc = []
-    lats_loc = []
-    for feature in office["features"]:
-        coords = feature["geometry"]["coordinates"]
-        lons_loc.append(coords[0])
-        lats_loc.append(coords[1])
+    # SAFE coffee locations
+    try:
+        lons_loc, lats_loc, hover_texts = [], [], []
+        for feature in locations.get("features", []):
+            coords = feature["geometry"]["coordinates"]
+            lons_loc.append(coords[0])
+            lats_loc.append(coords[1])
+            props = feature["properties"]
+            hover_texts.append(f"Name: {props.get('NAME', 'N/A')}<br>Revenue: ${props.get('REVENUE', 'N/A')}")
+        fig.add_trace(go.Scattermap(lon=lons_loc, lat=lats_loc, mode='markers', 
+                                  marker=dict(size=10, color='black'), name='Coffee Locations', 
+                                  text=hover_texts, hoverinfo='text'))
+    except:
+        pass
 
-    fig.add_trace(
-        go.Scattermap(
-            lon=lons_loc,
-            lat=lats_loc,
-            mode='markers',
-            marker=dict(size=15, color='yellow'),
-            name='Arima Office',
-            text='Arima Office',
-            hoverinfo='text'
-        )
-    )
+    # SAFE office location
+    try:
+        lons_loc, lats_loc = [], []
+        for feature in office.get("features", []):
+            coords = feature["geometry"]["coordinates"]
+            lons_loc.append(coords[0])
+            lats_loc.append(coords[1])
+        fig.add_trace(go.Scattermap(lon=lons_loc, lat=lats_loc, mode='markers', 
+                                  marker=dict(size=15, color='yellow'), name='Arima Office'))
+    except:
+        pass
 
-
-    fig.update_layout(
-        mapbox_style="carto-positron",
-        mapbox_center={"lat": 43.65569205940113, "lon": -79.38679602617921}, 
-        mapbox_zoom=18,
-        margin={"r":0,"t":0,"l":0,"b":0},
-        legend=dict(
-            font=dict(size=18)
-        ),
-    )
+    fig.update_layout(mapbox_style="carto-positron", mapbox_center={"lat": 43.65569205940113, "lon": -79.38679602617921}, mapbox_zoom=18, margin={"r":0,"t":0,"l":0,"b":0})
     return fig
 
 
