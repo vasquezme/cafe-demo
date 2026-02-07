@@ -333,12 +333,15 @@ def update_dashboard(selected_walk_time):
         fig5, #scatter-graph-2 top 5 coffee chains by revenue - donuts sold bubble chart
     )
 
-@app.callback(Output('chat-response', 'children'),
-              Input('user-input', 'value'))
-def handle_chat(user_query):
-    # Call NotebookLM API server-side with your service account
-    response = call_notebooklm_api(notebook_id="515420a1-c679-4948-9b5c-a9e729e529e6", query=user_query)
-    return response['answer']
+@app.callback(
+    Output("chat-response", "children"),
+    Input("user-input", "value"),
+)
+def handle_chat(user_msg):
+    if not user_msg:
+        raise dash.exceptions.PreventUpdate
+    answer = call_notebooklm(user_msg)  # your function
+    return answer or "No answer received."
 
 if __name__ == "__main__":
     app.run(debug=True)
