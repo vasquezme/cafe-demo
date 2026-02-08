@@ -202,6 +202,50 @@ app.layout = html.Div([
     dcc.Input(id='user-input', type='text', placeholder='Ask a question about the data...', style={'width': '80%', 'margin': '20px auto', 'fontSize': '18px'}),
     html.Button('Submit', id='submit-button', n_clicks=0, style={'display': 'block', 'margin': '0 auto', 'fontSize': '18px', 'fontWeight': 'bold'}),
     html.Div(id='chat-response', style={'whiteSpace': 'pre-line', 'margin': '20px', 'fontSize': '18px'}),
+
+    # POP-UP CHAT BUTTON (bottom right corner)
+    html.Div([
+        html.Button("💬 Ask AI", id="chat-toggle", n_clicks=0, style={
+            'position': 'fixed', 'bottom': '20px', 'right': '20px', 
+            'width': '60px', 'height': '60px', 'borderRadius': '50%', 
+            'border': 'none', 'background': '#4CAF50', 'color': 'white',
+            'fontSize': '20px', 'boxShadow': '0 4px 12px rgba(0,0,0,0.3)',
+            'zIndex': 1000, 'cursor': 'pointer'
+        }),
+        
+        # POP-UP MODAL (hidden by default)
+        html.Div(id="chat-modal", style={
+            'position': 'fixed', 'bottom': '100px', 'right': '20px', 
+            'width': '400px', 'height': '500px', 'background': 'white',
+            'boxShadow': '0 8px 32px rgba(0,0,0,0.3)', 'borderRadius': '15px',
+            'display': 'none', 'zIndex': 1001, 'flexDirection': 'column'
+        }, children=[
+            # Header
+            html.Div([
+                html.H3("AI Assistant", style={'margin': '15px', 'color': '#333'}),
+                html.Button("✕", id="chat-close", n_clicks=0, style={
+                    'position': 'absolute', 'top': '15px', 'right': '20px',
+                    'background': 'none', 'border': 'none', 'fontSize': '24px'
+                })
+            ]),
+            
+            # Chat messages area
+            html.Div(id="chat-messages", style={
+                'flex': 1, 'padding': '20px', 'overflowY': 'auto', 
+                'borderBottom': '1px solid #eee', 'background': '#f9f9f9'
+            }, children=[]),
+            
+            # Input area
+            html.Div([
+                dcc.Input(id='chat-input', type='text', placeholder='Ask about coffee shops...', 
+                         style={'flex': 1, 'border': 'none', 'padding': '15px'}),
+                html.Button('Send', id='chat-send', n_clicks=0, style={
+                    'background': '#4CAF50', 'color': 'white', 'border': 'none', 
+                    'padding': '15px 20px', 'borderRadius': '0 10px 10px 0'
+                })
+            ], style={'display': 'flex', 'padding': '15px'})
+        ])
+    ], style={'position': 'relative'})
 ])
 
 @app.callback(
@@ -309,6 +353,70 @@ def handle_chat(user_input, n_clicks):
         return no_update
     
     return f"✅ WORKING! You typed: {user_input}"
+
+# Toggle chat modal visibility
+@app.callback(
+    Output("chat-modal", "style"),
+    Input("chat-toggle", "n_clicks"),
+    Input("chat-close", "n_clicks"),
+    prevent_initial_call=True
+)
+def toggle_chat_modal(n_clicks_open, n_clicks_close):
+    ctx = dash.callback_context
+
+    if not ctx.triggered:
+        return {"display": "none"}  # Default to hidden
+
+    button_id = ctx.triggered[0]["prop_id"].split(".")[0]
+
+    if button_id == "chat-toggle":
+        return {"display": "flex", "position": "fixed", "bottom": "100px", "right": "20px", 
+                "width": "400px", "height": "500px", "background": "white",
+                "boxShadow": "0 8px 32px rgba(0,0,0,0.3)", "borderRadius": "15px",
+                "flexDirection": "column", "zIndex": 1001}
+    elif button_id == "chat-close":
+        return {"display": "none"}
+
+# Toggle chat popup
+@app.callback(
+    Output("chat-modal", "style"),
+    Input("chat-toggle", "n_clicks"),
+    State("chat-modal", "style")
+)
+def toggle_chat(open_chat, current_style):
+    if open_chat > 0:
+        current_style['display'] = 'flex'
+    return current_style
+
+# Close chat popup  
+@app.callback(
+    Output("chat-modal", "style"),
+    Input("chat-close", "n_clicks")
+)
+def close_chat(close_clicks):
+    return {'display': 'none'}  # Hide modal
+
+# Chat response
+@app.callback(
+    Output("chat-messages", "children"),
+    Input("chat-send", "n_clicks"),
+    State("chat-input", "value"),
+    State("chat-messages", "children")
+)
+def send_message(n_clicks, message, messages):
+    if n_clicks == 0 or not message:
+        return messages or []
+    
+    # Add user message
+    user_msg = html.Div([html.P(f"You: {message}", style={'margin': '5px 0', 'color': '#666'})], 
+                       style={'textAlign': 'right', 'marginBottom': '10px'})
+    
+    # Add AI response
+    ai_msg = html.Div([html.P("✅ " + message, style={'margin': '5px 0', 'color': '#333'}), 
+                      html.P("Coffee shop AI: Great question about your data!", style={'color': '#4CAF50', 'fontSize': '14px'})],
+                     style={'background': '#e8f5e8', 'padding': '10px', 'borderRadius': '10px'})
+    
+    return (messages or []) + [user_msg, ai_msg]
 
 if __name__ == "__main__":
     app.run(debug=True)
