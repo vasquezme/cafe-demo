@@ -1,15 +1,11 @@
 import pandas as pd
 import dash
-from dash import dcc, html, Input, Output, callback, no_update, clientside_callback, State
+from dash import dcc, html, Input, Output
 import plotly.express as px
 import json
 import plotly.graph_objects as go
 import posthog
-import requests  # Use official/unofficial NotebookLM API
-import os  # Import os for environment variable access
 
-# Set the environment variable for test mode
-os.environ['NOTEBOOKLM_TEST_MODE'] = 'true'
 
 posthog.api_key = 'phc_RLhhUoMn6wYHZYUizZRKGW8wf2N64mlvdkKzK0lyF95'
 posthog.host = 'https://us.i.posthog.com'
@@ -50,58 +46,97 @@ server = app.server
 
 def create_map(selected_walk_time):
     fig = go.Figure()
-    
-    # SAFE polygon handling - no more IndexError
-    def safe_add_polygon(poly_data, color, name):
-        try:
-            if poly_data.get('features') and len(poly_data['features']) > 0:
-                coords = poly_data["features"][0]["geometry"]["coordinates"][0]
-                lons, lats = zip(*coords)
-                fig.add_trace(go.Scattermap(lon=lons, lat=lats, mode='lines', fill='toself', 
-                                          fillcolor=color, line=dict(width=2, color=color), name=name))
-        except (IndexError, KeyError, ValueError):
-            pass  # Skip broken polygons silently
-    
-    # Safe polygon loading
+    # Add polygons based on selected_walk_time
     if selected_walk_time == '5':
-        safe_add_polygon(min5polygon, 'rgba(173, 216, 230, 0.7)', '5min-walk')
+        polygon_coords = min5polygon["features"][0]["geometry"]["coordinates"][0]
+        lons, lats = zip(*polygon_coords)
+        fig.add_trace(go.Scattermap(lon=lons, lat=lats, mode='lines', fill='toself', fillcolor='rgba(173, 216, 230, 0.7)', line=dict(width=2, color='blue'), name='5min-walk Polygon'))
     elif selected_walk_time == '10':
-        safe_add_polygon(min10polygon, 'rgba(255, 204, 203, 0.7)', '10min-walk')
+        polygon_coords = min10polygon["features"][0]["geometry"]["coordinates"][0]
+        lons, lats = zip(*polygon_coords)
+        fig.add_trace(go.Scattermap(lon=lons, lat=lats, mode='lines', fill='toself', fillcolor='rgba(255, 204, 203, 0.7)', line=dict(width=2, color='red'), name='10min-walk Polygon'))
     elif selected_walk_time == '15':
-        safe_add_polygon(min15polygon, 'rgba(255, 165, 0, 0.3)', '15min-walk')
+        polygon_coords = min15polygon["features"][0]["geometry"]["coordinates"][0]
+        lons, lats = zip(*polygon_coords)
+        fig.add_trace(go.Scattermap(lon=lons, lat=lats, mode='lines', fill='toself', fillcolor='rgba(255, 165, 0, 0.3)', line=dict(width=2, color='orange'), name='15min-walk Polygon'))
     elif selected_walk_time == 'all':
-        safe_add_polygon(min5polygon, 'rgba(173, 216, 230, 0.3)', '5 min')
-        safe_add_polygon(min10polygon, 'rgba(255, 204, 203, 0.3)', '10 min')
-        safe_add_polygon(min15polygon, 'rgba(255, 165, 0, 0.3)', '15 min')
+        for mins, poly, fillcolor, linecolor, legend in [
+            ('5', min5polygon, 'rgba(173, 216, 230, 0.3)', 'blue', '5 min. Walk Time'), 
+            ('10', min10polygon, 'rgba(255, 204, 203, 0.3)', 'red', '10 min. Walk Time'),
+            ('15', min15polygon, 'rgba(255, 165, 0, 0.3)', 'orange', '15 min. Walk Time') 
+        ]:
+            polygon_coords = poly["features"][0]["geometry"]["coordinates"][0]
+            lons, lats = zip(*polygon_coords)
+            fig.add_trace(go.Scattermap(
+                lon=lons,
+                lat=lats,
+                mode='lines',
+                fill='toself',
+                fillcolor=fillcolor,
+                line=dict(width=2, color=linecolor),
+                name=legend
+            ))
 
-    # SAFE coffee locations
-    try:
-        lons_loc, lats_loc, hover_texts = [], [], []
-        for feature in locations.get("features", []):
-            coords = feature["geometry"]["coordinates"]
-            lons_loc.append(coords[0])
-            lats_loc.append(coords[1])
-            props = feature["properties"]
-            hover_texts.append(f"Name: {props.get('NAME', 'N/A')}<br>Revenue: ${props.get('REVENUE', 'N/A')}")
-        fig.add_trace(go.Scattermap(lon=lons_loc, lat=lats_loc, mode='markers', 
-                                  marker=dict(size=10, color='black'), name='Coffee Locations', 
-                                  text=hover_texts, hoverinfo='text'))
-    except:
-        pass
+    # Add locations
+    # Extract all coffee location points
+    lons_loc = []
+    lats_loc = []
+    hover_texts = []
+    for feature in locations["features"]:
+        coords = feature["geometry"]["coordinates"]
+        lons_loc.append(coords[0])
+        lats_loc.append(coords[1])
+        props = feature["properties"]
+        hover_texts.append(
+            f"Name: {props.get('NAME', 'N/A')}<br>"
+            f"Chain: {props.get('CHAIN_NAME', 'N/A')}<br>"
+            f"Revenue: ${props.get('REVENUE', 'N/A')}<br>"
+            f"Rating: {props.get('RATING', 'N/A')}"
+        )
+    
+    fig.add_trace(
+        go.Scattermap(
+            lon=lons_loc,
+            lat=lats_loc,
+            mode='markers',
+            marker=dict(size=10, color='black'),
+            name='Coffee Locations',
+            text=hover_texts,
+            hoverinfo='text'
+        )
+    )
 
-    # SAFE office location
-    try:
-        lons_loc, lats_loc = [], []
-        for feature in office.get("features", []):
-            coords = feature["geometry"]["coordinates"]
-            lons_loc.append(coords[0])
-            lats_loc.append(coords[1])
-        fig.add_trace(go.Scattermap(lon=lons_loc, lat=lats_loc, mode='markers', 
-                                  marker=dict(size=15, color='yellow'), name='Arima Office'))
-    except:
-        pass
+    # Add office location
+    # Extract all coffee location points
+    lons_loc = []
+    lats_loc = []
+    for feature in office["features"]:
+        coords = feature["geometry"]["coordinates"]
+        lons_loc.append(coords[0])
+        lats_loc.append(coords[1])
 
-    fig.update_layout(mapbox_style="carto-positron", mapbox_center={"lat": 43.65569205940113, "lon": -79.38679602617921}, mapbox_zoom=18, margin={"r":0,"t":0,"l":0,"b":0})
+    fig.add_trace(
+        go.Scattermap(
+            lon=lons_loc,
+            lat=lats_loc,
+            mode='markers',
+            marker=dict(size=15, color='yellow'),
+            name='Arima Office',
+            text='Arima Office',
+            hoverinfo='text'
+        )
+    )
+
+
+    fig.update_layout(
+        mapbox_style="carto-positron",
+        mapbox_center={"lat": 43.65569205940113, "lon": -79.38679602617921}, 
+        mapbox_zoom=18,
+        margin={"r":0,"t":0,"l":0,"b":0},
+        legend=dict(
+            font=dict(size=18)
+        ),
+    )
     return fig
 
 
@@ -197,51 +232,7 @@ app.layout = html.Div([
     dcc.Graph(id='scatter-graph'),
     html.Div([
     ], style={"display": "flex", "justifyContent": "center", "alignItems": "stretch", "gap": "20px"}),
-    dcc.Graph(id='scatter-graph-2'),
-
-    # POP-UP CHAT BUTTON (bottom right corner)
-    html.Div([
-        html.Button("💬 Ask AI", id="chat-toggle", n_clicks=0, style={
-            'position': 'fixed', 'bottom': '20px', 'right': '20px', 
-            'width': '60px', 'height': '60px', 'borderRadius': '50%', 
-            'border': 'none', 'background': '#4CAF50', 'color': 'white',
-            'fontSize': '20px', 'boxShadow': '0 4px 12px rgba(0,0,0,0.3)',
-            'zIndex': 1000, 'cursor': 'pointer'
-        }),
-        
-        # POP-UP MODAL (hidden by default)
-        html.Div(id="chat-modal", style={
-            'position': 'fixed', 'bottom': '100px', 'right': '20px', 
-            'width': '400px', 'height': '500px', 'background': 'white',
-            'boxShadow': '0 8px 32px rgba(0,0,0,0.3)', 'borderRadius': '15px',
-            'display': 'none', 'zIndex': 1001, 'flexDirection': 'column'
-        }, children=[
-            # Header
-            html.Div([
-                html.H3("AI Assistant", style={'margin': '15px', 'color': '#333'}),
-                html.Button("✕", id="chat-close", n_clicks=0, style={
-                    'position': 'absolute', 'top': '15px', 'right': '20px',
-                    'background': 'none', 'border': 'none', 'fontSize': '24px'
-                })
-            ]),
-            
-            # Chat messages area
-            html.Div(id="chat-messages", style={
-                'flex': 1, 'padding': '20px', 'overflowY': 'auto', 
-                'borderBottom': '1px solid #eee', 'background': '#f9f9f9'
-            }, children=[]),
-            
-            # Input area
-            html.Div([
-                dcc.Input(id='chat-input', type='text', placeholder='Ask about coffee shops...', 
-                         style={'flex': 1, 'border': 'none', 'padding': '15px'}),
-                html.Button('Send', id='chat-send', n_clicks=0, style={
-                    'background': '#4CAF50', 'color': 'white', 'border': 'none', 
-                    'padding': '15px 20px', 'borderRadius': '0 10px 10px 0'
-                })
-            ], style={'display': 'flex', 'padding': '15px'})
-        ])
-    ], style={'position': 'relative'})
+    dcc.Graph(id='scatter-graph-2')
 ])
 
 @app.callback(
@@ -271,7 +262,14 @@ def update_output(selected_walk_time):
     )
     return update_dashboard(selected_walk_time)
 
-
+def update_dashboard(selected_walk_time):
+    if selected_walk_time == 'all':
+        filtered_df = locations_df
+    elif selected_walk_time == '15':
+        filtered_df = locations_df[locations_df['properties.WALKTIME'].astype(str).isin(['5', '10', '15'])]
+    else:
+        filtered_df = locations_df[locations_df['properties.WALKTIME'].astype(str) == selected_walk_time]
+                                                                                      
     # Scorecard calculations
     total_locations = filtered_df.shape[0]
     total_revenue = filtered_df['properties.REVENUE'].sum()
@@ -285,86 +283,51 @@ def update_output(selected_walk_time):
         .sum().sort_values(by='properties.REVENUE', ascending=False)
         .rename(columns={'properties.NAME': 'Coffee Shop', 'properties.REVENUE': 'Revenue ($)'})
     )
+    grouped_df1 = (
+        filtered_df.groupby('properties.CHAIN_NAME', as_index=False)['properties.REVENUE']
+        .sum().sort_values(by='properties.REVENUE', ascending=False)
+    )
 
-def update_dashboard(selected_walk_time):  # FIXED - no clientside_callback inside!
-    if selected_walk_time == 'all':
-        filtered_df = locations_df
-    elif selected_walk_time == '15':
-        filtered_df = locations_df[locations_df['properties.WALKTIME'].astype(str).isin(['5', '10', '15'])]
-    else:
-        filtered_df = locations_df[locations_df['properties.WALKTIME'].astype(str) == selected_walk_time]
-    
-    # ... rest of your existing calculations ...
-    total_locations = filtered_df.shape[0]
-    total_revenue = filtered_df['properties.REVENUE'].sum()
-    total_customers = filtered_df['properties.CUSTOMERS'].sum()
-    total_donuts_sold = filtered_df['properties.DONUTS_SOLD'].sum()
-    average_distance = filtered_df['properties.DISTANCE'].mean()
-    average_rating = filtered_df['properties.RATING'].mean()
+    top5_names = (filtered_df.groupby('properties.NAME')['properties.REVENUE']
+                  .sum()
+                  .sort_values(ascending=False)
+                  .head(5)
+                  .index
+    )
+    top5_df = filtered_df[filtered_df['properties.NAME'].isin(top5_names)]
 
-    # ... your charts code ...
+
+    fig1 = px.bar(grouped_df, x='Coffee Shop', y='Revenue ($)', title='Coffee Shop Revenue')
+    fig2 = px.pie(filtered_df, names="properties.CHAIN_NAME", title="Market Share by Location Counts")
+    fig3 = px.pie(grouped_df1, names="properties.CHAIN_NAME", values="properties.REVENUE", title="Market Share by Revenue")
+    fig4 = px.scatter(top5_df, x='properties.DISTANCE', y='properties.REVENUE', size='properties.CUSTOMERS', color='properties.NAME', hover_name='properties.NAME', log_x=False, size_max=40,
+                      title='Top 5 Coffee Chains by Revenue - Customer Counts',
+                      labels={'properties.DISTANCE': 'Distance', 'properties.REVENUE': 'Revenue ($)', 'properties.CUSTOMERS': 'Customers', 'properties.NAME': 'Coffee Shop'})   
+    fig5 = px.scatter(top5_df, x='properties.DISTANCE', y='properties.REVENUE', size='properties.DONUTS_SOLD', color='properties.NAME', hover_name='properties.NAME', log_x=False, size_max=40,
+                      title='Top 5 Coffee Chains by Revenue - Donuts Sold',
+                      labels={'properties.DISTANCE': 'Distance', 'properties.REVENUE': 'Revenue ($)', 'properties.DONUTS_SOLD': 'Donuts Sold', 'properties.NAME': 'Coffee Shop'}) 
+
+    # If you want a third chart, use grouped_df1
+
+
+    # Map
     fig_map = create_map(selected_walk_time)
-    return (fig_map, f"{total_locations}", f"${total_revenue}", f"{total_customers}",
-            f"{total_donuts_sold}", f"{average_distance:.1f}", f"{average_rating:.0f} Stars",
-            fig1, fig2, fig3, fig4, fig5)
 
-# ✅ ONE WORKING CLIENTSIDE CALLBACK - BOTTOM OF FILE
-clientside_callback(
-    """
-    function(n_open, n_close, n_send, input_value, current_messages) {
-        let modalStyle = {
-            'position': 'fixed', 'bottom': '100px', 'right': '20px', 
-            'width': '400px', 'height': '500px', 'background': 'white',
-            'boxShadow': '0 8px 32px rgba(0,0,0,0.3)', 'borderRadius': '15px',
-            'zIndex': 1001, 'flexDirection': 'column', 'display': 'none'
-        };
-        
-        if (n_open > 0) {
-            modalStyle.display = 'flex';
-            return [modalStyle, current_messages || []];
-        }
-        if (n_close > 0) {
-            modalStyle.display = 'none';
-            return [modalStyle, current_messages || []];
-        }
-        
-        if (n_send > 0 && input_value && input_value.trim()) {
-            let messages = current_messages || [];
-            
-            // User message (blue bubble)
-            messages.push(html_div({style: {textAlign: 'right', marginBottom: '10px'}},
-                html_div({style: {
-                    background: '#e3f2fd', padding: '12px 16px', 
-                    borderRadius: '18px 18px 5px 18px', display: 'inline-block',
-                    maxWidth: '80%', marginLeft: 'auto'
-                }}, input_value)
-            ));
-            
-            // AI response (green bubble)
-            let aiResp = '✅ TEST PASSED! Chat works perfectly!';
-            let q = input_value.toLowerCase();
-            if (q.includes('revenue')) aiResp = '☕ Top revenue: Dark Horse Espresso (check bar chart)';
-            else if (q.includes('walk')) aiResp = '🚶 3 shops within 5 mins (use dropdown)';
-            else if (q.includes('test')) aiResp = '🎉 Perfect! Try "revenue" or "walk" next';
-            
-            messages.push(html_div({style: {marginBottom: '15px'}},
-                html_div({style: {
-                    background: 'linear-gradient(135deg, #4CAF50, #45a049)',
-                    padding: '12px 16px', borderRadius: '18px 18px 18px 5px',
-                    color: 'white', maxWidth: '85%'
-                }}, `☕ CoffeeBot: ${aiResp}`)
-            ));
-            
-            document.getElementById('chat-input').value = '';
-            modalStyle.display = 'flex';
-            return [modalStyle, messages];
-        }
-        return [modalStyle, current_messages || []];
-    }
-    """,
-    [Output('chat-modal', 'style'), Output('chat-messages', 'children')],
-    [Input('chat-toggle', 'n_clicks'), Input('chat-close', 'n_clicks'), Input('chat-send', 'n_clicks')],
-    [State('chat-input', 'value'), State('chat-messages', 'children')]
-)
+    return (
+        fig_map, # Map figure
+        f"{total_locations}", #scorecard-shops
+        f"${total_revenue}", #scorecard-shops
+        f"{total_customers}", #scorecard-shops
+        f"{total_donuts_sold}", #scorecard-shops
+        f"{average_distance:.1f}", #scorecard-shops
+        f"{average_rating:.0f} Stars", #scorecard-shops
+        fig1, #bar-graph all stores
+        fig2, #pie-graph chains vs independents
+        fig3, #pie-graph-2 revenue by coffee shops
+        fig4, #scatter-graph distance vs revenue - customer counts bubble chart
+        fig5, #scatter-graph-2 top 5 coffee chains by revenue - donuts sold bubble chart
+    )
+
+
 if __name__ == "__main__":
     app.run(debug=True)
